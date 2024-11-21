@@ -1,12 +1,12 @@
 <template>
-  <div class="container">
-    <nav>
-      <nav-component />
-    </nav>
-    <main>
-      <h2>hello!</h2>
-    </main>
-  </div>
+        <div class="container">
+      <nav>
+        <nav-component />
+      </nav>
+      <main>
+        <h2>emprestimos</h2>
+      </main>
+    </div>
 </template>
 
 <script>
