@@ -1,6 +1,12 @@
 <template>
-  <h2>hello!</h2>
-  <nav-component />
+  <div class="container">
+    <nav>
+      <nav-component />
+    </nav>
+    <main>
+      <h2>hello!</h2>
+    </main>
+  </div>
 </template>
 
 <script>
@@ -12,3 +18,13 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.container {
+  display: flex;
+  height: 100vh;
+}
+main {
+  flex-grow: 1;
+}
+</style>
