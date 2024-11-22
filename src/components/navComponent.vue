@@ -27,7 +27,7 @@
             <div class="button-container">
                 <router-link to="/livros">
                     <img src="@/assets/livro.png">
-                    <span class="label">Livros</span>
+                    <span class="label">Biblioteca</span>
                 </router-link>
             </div>
         </div>

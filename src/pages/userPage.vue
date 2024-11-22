@@ -37,25 +37,31 @@
         </tbody>
       </table>
       <add-usuario :showModal="isModalOpen" @close="closeModal" @add="addUser"></add-usuario>
+      <edit-usuario :showModal="isEditModalOpen" :user="selectedUser" @close="closeEditModal" @edit="updateUser"></edit-usuario>
     </main>
   </div>
 </template>
 
 <script>
+import { reactive } from 'vue';
 import navComponent from '../components/navComponent.vue';
 import addUsuario from '../components/addUsuario.vue';
+import editUsuario from '../components/editUsuario.vue';
 import axios from 'axios';
 
 export default {
   components: {
     navComponent,
-    addUsuario
+    addUsuario,
+    editUsuario
   },
   data() {
     return {
       columns: [], 
-      rows: [], 
+      rows: reactive([]), 
       isModalOpen: false, 
+      isEditModalOpen: false,
+      selectedUser: null,
     };
   },
   mounted() {
@@ -80,6 +86,10 @@ export default {
     closeModal() {
       this.isModalOpen = false;
     },
+    closeEditModal() {
+      this.isEditModalOpen = false;
+      this.selectedUser = null;
+    },
     async addUser(usuario) {
       try {
         console.log('Adding user:', usuario); // Log the user data being sent
@@ -98,18 +108,24 @@ export default {
       }
     },
     async editRow(row) {
+      this.selectedUser = { ...row };
+      console.log('Editing row:', this.selectedUser); // Log the row data being edited
+      this.isEditModalOpen = true;
+    },
+    async updateUser(updatedUser) {
       try {
-        const updatedData = { /* dados atualizados */ };
-        const response = await axios.put(`http://localhost:3000/api/usuarios/${row.id}`, updatedData, {
+        const response = await axios.put(`http://localhost:3000/api/usuarios/${this.selectedUser.id}`, updatedUser, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
-        const index = this.rows.findIndex(r => r.id === row.id);
-        this.$set(this.rows, index, response.data);
+        const index = this.rows.findIndex(r => r.id === this.selectedUser.id);
+        this.rows[index] = response.data;
         console.log('Usuário editado com sucesso', response.data);
+        this.closeEditModal();
       } catch (error) {
         console.error('Erro ao editar usuário:', error);
+        console.error('Error response:', error.response); // Log the error response
       }
     },
     async deleteRow(row) {
