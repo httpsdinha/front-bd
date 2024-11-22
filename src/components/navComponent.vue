@@ -100,6 +100,8 @@ header img {
     display: flex;
     align-items: center;
     width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .buttons img, header img {
