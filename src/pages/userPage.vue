@@ -45,8 +45,8 @@
 <script>
 import { reactive } from 'vue';
 import navComponent from '../components/navComponent.vue';
-import addUsuario from '../components/addUsuario.vue';
-import editUsuario from '../components/editUsuario.vue';
+import addUsuario from '../components/Usuario/addUsuario.vue';
+import editUsuario from '../components/Usuario/editUsuario.vue';
 import axios from 'axios';
 
 export default {

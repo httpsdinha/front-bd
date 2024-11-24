@@ -10,7 +10,7 @@
             <img src="@/assets/livro_azul.png">
             <h2 class="titulo">Biblioteca</h2>
           </div>
-          <button @click="openModal">
+          <button @click="openAddModal">
             <img class="adicionar" src="@/assets/adicionar.png">
           </button>
         </div>
@@ -47,51 +47,18 @@
           <thead>
             <tr>
               <th v-for="column in authorColumns" :key="column">{{ column }}</th>
-              <th>Alterações</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="author in authors" :key="author.id">
               <td v-for="column in authorColumns" :key="column">{{ author[column] }}</td>
-              <td>
-                <button @click="editAuthor(author)">
-                  <img src="@/assets/editar.png" alt="Editar">
-                </button>
-                <button @click="deleteAuthor(author)">
-                  <img src="@/assets/delete.png" alt="Deletar">
-                </button>
-              </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div v-if="isModalOpen" class="modal">
-        <div class="modal-content">
-          <span class="close" @click="closeModal">&times;</span>
-          <form @submit.prevent="addBook">
-            <div>
-              <label for="title">Título:</label>
-              <input type="text" v-model="newBook.titulo" required>
-            </div>
-            <div>
-              <label for="author">Autor:</label>
-              <input type="text" v-model="newBook.autor" required>
-            </div>
-            <div>
-              <label for="isbn">ISBN:</label>
-              <input type="text" v-model="newBook.isbn" required>
-            </div>
-            <div>
-              <label for="status">Status:</label>
-              <select v-model="newBook.status" required>
-                <option value="disponível">Disponível</option>
-                <option value="indisponível">Indisponível</option>
-              </select>
-            </div>
-            <button type="submit">Adicionar</button>
-          </form>
-        </div>
-      </div>
+      <add-livro :showModal="isAddModalOpen" @close="closeAddModal" @add="addBook" @refresh="fetchData" @refreshAuthors="fetchAuthors"></add-livro>
+      <edit-livro :showModal="isEditModalOpen" :livro="selectedBook" @close="closeEditModal" @edit="updateBook" @refresh="fetchData"></edit-livro>
+      <div v-if="successMessage" class="success-message">{{ successMessage }}</div>
     </main>
   </div>
 </template>
@@ -99,11 +66,15 @@
 <script>
 import { reactive } from 'vue';
 import navComponent from '../components/navComponent.vue';
+import addLivro from '../components/Livro/addLivro.vue';
+import editLivro from '../components/Livro/editLivro.vue';
 import axios from 'axios';
 
 export default {
   components: {
-    navComponent
+    navComponent,
+    addLivro,
+    editLivro
   },
   data() {
     return {
@@ -111,14 +82,17 @@ export default {
       rows: reactive([]),
       authorColumns: ['id', 'nome'],
       authors: reactive([]),
-      isModalOpen: false,
+      isAddModalOpen: false,
+      isEditModalOpen: false,
+      selectedBook: null,
       newBook: {
         titulo: '',
         autor: '',
         isbn: '',
         status: 'disponível'
       },
-      activeTab: 'livros'
+      activeTab: 'livros',
+      successMessage: ''
     };
   },
   mounted() {
@@ -140,36 +114,57 @@ export default {
     },
     async fetchAuthors() {
       try {
-        const response = await axios.get('http://localhost:3000/api/autores');
+        const response = await axios.get('http://localhost:3000/api/autores/livros');
         this.authors = response.data;
+        this.authorColumns = Object.keys(response.data[0] || {});
       } catch (error) {
         console.error('Erro ao buscar autores:', error);
       }
     },
-    openModal() {
-      this.isModalOpen = true;
+    openAddModal() {
+      this.isAddModalOpen = true;
     },
-    closeModal() {
-      this.isModalOpen = false;
+    closeAddModal() {
+      this.isAddModalOpen = false;
     },
-    async addBook() {
+    addBook(livro) {
+      this.rows.push(livro);
+      alert('Livro adicionado com sucesso!');
+      this.closeAddModal();
+    },
+    openEditModal(book) {
+      this.selectedBook = book;
+      this.isEditModalOpen = true;
+    },
+    closeEditModal() {
+      this.isEditModalOpen = false;
+    },
+    async updateBook(updatedBook) {
       try {
-        const response = await axios.post('http://localhost:3000/api/livros', this.newBook, {
+        const response = await axios.put(`http://localhost:3000/api/livros/${updatedBook.id}`, updatedBook, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
-        this.rows.push(response.data);
-        this.closeModal();
+        const index = this.rows.findIndex(book => book.id === updatedBook.id);
+        if (index !== -1) {
+          this.rows[index] = response.data;
+        }
+        this.closeEditModal();
       } catch (error) {
-        console.error('Erro ao adicionar livro:', error);
+        console.error('Erro ao atualizar livro:', error);
       }
     },
-    editRow() {
-      // Implement edit functionality
+    editRow(row) {
+      this.openEditModal(row);
     },
-    deleteRow() {
-      // Implement delete functionality
+    async deleteRow(row) {
+      try {
+        await axios.delete(`http://localhost:3000/api/livros/${row.id}`);
+        this.rows = this.rows.filter(book => book.id !== row.id);
+      } catch (error) {
+        console.error('Erro ao deletar livro:', error);
+      }
     },
     editAuthor() {
       // Implement edit functionality for authors
@@ -275,5 +270,11 @@ td:last-child {
 button img {
   width: 20px;
   height: auto;
+}
+
+.success-message {
+  color: green;
+  font-weight: bold;
+  margin-top: 10px;
 }
 </style>

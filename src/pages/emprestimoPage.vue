@@ -10,6 +10,9 @@
             <img src="@/assets/emprestimo_azul.png">
             <h2>Empréstimos</h2>
           </div>
+          <button @click="openAddModal">
+            <img class="adicionar" src="@/assets/adicionar.png">
+          </button>
         </div>
       </header>
       <table>
@@ -33,6 +36,8 @@
           </tr>
         </tbody>
       </table>
+      <addEmprestimo :showModal="showAddModal" @close="closeAddModal" @add="handleAddLivro" />
+      <editEmprestimo :showModal="showEditModal" :emprestimo="selectedEmprestimo" @close="closeEditModal" @edit="handleEditEmprestimo" />
     </main>
   </div>
 </template>
@@ -40,16 +45,23 @@
 <script>
 import { reactive } from 'vue';
 import navComponent from '../components/navComponent.vue';
+import addEmprestimo from '../components/Emprestimo/addEmprestimo.vue';
+import editEmprestimo from '../components/Emprestimo/editEmprestimo.vue';
 import axios from 'axios';
 
 export default {
   components: {
-    navComponent
+    navComponent,
+    addEmprestimo,
+    editEmprestimo
   },
   data() {
     return {
       columns: [],
       rows: reactive([]),
+      showAddModal: false,
+      showEditModal: false,
+      selectedEmprestimo: null
     };
   },
   mounted() {
@@ -68,11 +80,38 @@ export default {
         console.error('Erro ao buscar dados:', error);
       }
     },
-    editRow() {
-      // Implement edit functionality
+    editRow(row) {
+      this.selectedEmprestimo = row;
+      this.showEditModal = true;
     },
-    deleteRow() {
-      // Implement delete functionality
+    async deleteRow(row) {
+      try {
+        await axios.delete(`http://localhost:3000/api/emprestimos/${row.id}`);
+        this.rows = this.rows.filter(r => r.id !== row.id);
+      } catch (error) {
+        console.error('Erro ao deletar empréstimo:', error);
+      }
+    },
+    openAddModal() {
+      this.showAddModal = true;
+    },
+    closeAddModal() {
+      this.showAddModal = false;
+    },
+    handleAddLivro(livroData) {
+      this.rows.push(livroData);
+      this.closeAddModal();
+    },
+    closeEditModal() {
+      this.showEditModal = false;
+    },
+    async handleEditEmprestimo(editedEmprestimo) {
+      const index = this.rows.findIndex(row => row.id === editedEmprestimo.id);
+      if (index !== -1) {
+        this.rows.splice(index, 1, editedEmprestimo);
+      }
+      this.closeEditModal();
+      await this.fetchData(); // Refresh data after editing
     }
   }
 }
@@ -140,5 +179,9 @@ td:last-child {
 button img {
   width: 20px;
   height: auto;
+}
+
+button:hover .adicionar {
+  transform: scale(1.1);
 }
 </style>
