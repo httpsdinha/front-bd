@@ -52,8 +52,11 @@ export default {
     data() {
         return {
             editedEmprestimo: {
-                devolvido: 'Não',
-                statusDevolucao: 'Não'
+                usuarioId: '',
+                livroId: '',
+                dataEmprestimo: '',
+                dataDevolucao: '',
+                devolvido: false
             },
             livros: [], // Array to hold book data
             usuarios: [] // Array to hold user data
@@ -66,8 +69,7 @@ export default {
                 if (newEmprestimo) {
                     this.editedEmprestimo = { 
                         ...newEmprestimo, 
-                        devolvido: newEmprestimo.devolvido ? 'Sim' : 'Não',
-                        statusDevolucao: newEmprestimo.devolvido ? 'Sim' : 'Não',
+                        devolvido: newEmprestimo.devolvido ? true : false,
                         dataDevolucao: newEmprestimo.dataDevolucao ? new Date(newEmprestimo.dataDevolucao).toISOString().split('T')[0] : ''
                     };
                     delete this.editedEmprestimo.quantidade;
@@ -80,15 +82,25 @@ export default {
     },
     methods: {
         async submitEdit() {
-            await this.updateEmprestimo();
+            const emprestimoData = {
+                usuarioId: this.editedEmprestimo.usuarioId,
+                livroId: this.editedEmprestimo.livroId,
+                dataEmprestimo: this.editedEmprestimo.dataEmprestimo ? new Date(this.editedEmprestimo.dataEmprestimo).toISOString() : null, // Ensure ISO-8601 format
+                dataDevolucao: this.editedEmprestimo.dataDevolucao ? new Date(this.editedEmprestimo.dataDevolucao).toISOString() : null, // Ensure ISO-8601 format
+                statusDevolucao: String(this.editedEmprestimo.devolvido) // Ensure statusDevolucao is a string
+            };
+            console.log('Data being sent:', emprestimoData);
+            await axios.put(`http://localhost:3000/api/emprestimos/${this.editedEmprestimo.id}`, emprestimoData);
             this.$emit('edit', this.editedEmprestimo);
         },
         async updateEmprestimo() {
             try {
                 const dataToSend = {
-                    ...this.editedEmprestimo,
-                    devolvido: this.editedEmprestimo.devolvido,
-                    statusDevolucao: this.editedEmprestimo.devolvido
+                    usuarioId: this.editedEmprestimo.usuarioId,
+                    livroId: this.editedEmprestimo.livroId,
+                    dataEmprestimo: this.editedEmprestimo.dataEmprestimo ? new Date(this.editedEmprestimo.dataEmprestimo).toISOString() : null, // Ensure ISO-8601 format
+                    dataDevolucao: this.editedEmprestimo.dataDevolucao ? new Date(this.editedEmprestimo.dataDevolucao).toISOString() : null, // Ensure ISO-8601 format
+                    statusDevolucao: String(this.editedEmprestimo.devolvido) // Ensure statusDevolucao is a string
                 };
                 console.log('Data being sent:', dataToSend);
                 await axios.put(`http://localhost:3000/api/emprestimos/${this.editedEmprestimo.id}`, dataToSend);

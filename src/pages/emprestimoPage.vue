@@ -98,8 +98,16 @@ export default {
     closeAddModal() {
       this.showAddModal = false;
     },
-    handleAddLivro(livroData) {
-      this.rows.push(livroData);
+    async handleAddLivro(livroData) {
+      const newEmprestimo = {
+        usuarioId: livroData.usuarioId,
+        livroId: livroData.livroId,
+        dataEmprestimo: new Date(livroData.dataEmprestimo).toISOString(), // Ensure ISO-8601 format
+        dataDevolucao: new Date(livroData.dataDevolucao).toISOString(), // Ensure ISO-8601 format
+        statusDevolucao: String(livroData.statusDevolucao) // Ensure statusDevolucao is a string
+      };
+      console.log('Data being sent:', newEmprestimo); // Log the data being sent
+      this.rows.push(newEmprestimo);
       this.closeAddModal();
     },
     closeEditModal() {

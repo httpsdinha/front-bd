@@ -74,7 +74,13 @@ export default {
             };
         },
         addEmprestimo() {
-            const emprestimoData = { ...this.emprestimo }; // Convert reactive object to plain object
+            const emprestimoData = {
+                usuarioId: this.emprestimo.usuarioId,
+                livroId: this.emprestimo.livroId,
+                dataEmprestimo: new Date(this.emprestimo.dataEmprestimo).toISOString(), // Ensure ISO-8601 format
+                dataDevolucao: new Date(this.emprestimo.dataDevolucao).toISOString(), // Ensure ISO-8601 format
+                statusDevolucao: String(this.emprestimo.devolvido) // Ensure statusDevolucao is a string
+            };
             console.log('Emprestimo Data:', emprestimoData); // Log the data being sent
 
             axios.post('http://localhost:3000/api/emprestimos', emprestimoData, {
