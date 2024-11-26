@@ -69,6 +69,16 @@ export default {
   height: 100vh;
 }
 
+nav {
+  height: 100%;
+  flex-shrink: 0;
+  transition: width 0.3s;
+}
+
+nav:hover {
+  width: 15vw;
+}
+
 h2 {
   color: #2A5184;
   font-family: 'Judson';
@@ -108,6 +118,7 @@ main {
 table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto; /* Add this line */
 }
 th, td {
   border: 1px solid #ddd;
@@ -116,4 +127,5 @@ th, td {
 th {
   background-color: #f2f2f2;
 }
+
 </style>

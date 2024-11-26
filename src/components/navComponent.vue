@@ -44,7 +44,7 @@ export default {
 <style scoped>
 main {
     background: linear-gradient(1deg, #2A5184 2.61%, #0F1C2B 100%);
-    height: 100vh;
+    height: 100%;
     flex-shrink: 0;
     padding: 2rem 1rem;
     display: flex;
